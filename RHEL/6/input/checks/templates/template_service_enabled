@@ -8,17 +8,29 @@
         <platform>Red Hat Enterprise Linux 6</platform>
       </affected>
       <description>The SERVICENAME service should be enabled if possible.</description>
+      <reference source="changeme" ref_id="20140828" ref_url="test_attestation" />
     </metadata>
     <criteria comment="package PACKAGENAME installed and service SERVICENAME is configured to start" operator="AND">
     <extend_definition comment="PACKAGENAME installed" definition_ref="package_PACKAGENAME_installed" />
     <criteria operator="OR" comment="service SERVICENAME is configured to start">
-      <criterion comment="SERVICENAME runlevel 0" test_ref="test_runlevel0_SERVICENAME" />
-      <criterion comment="SERVICENAME runlevel 1" test_ref="test_runlevel1_SERVICENAME" />
-      <criterion comment="SERVICENAME runlevel 2" test_ref="test_runlevel2_SERVICENAME" />
-      <criterion comment="SERVICENAME runlevel 3" test_ref="test_runlevel3_SERVICENAME" />
-      <criterion comment="SERVICENAME runlevel 4" test_ref="test_runlevel4_SERVICENAME" />
-      <criterion comment="SERVICENAME runlevel 5" test_ref="test_runlevel5_SERVICENAME" />
-      <criterion comment="SERVICENAME runlevel 6" test_ref="test_runlevel6_SERVICENAME" />
+      <criteria operator="AND" comment="service SERVICENAME is configured with runlevel">
+        <extend_definition comment="RHEL6 installed" definition_ref="installed_OS_is_rhel6"/>
+        <criteria operator="OR" comment="service SERVICENAME is configured to start">
+          <criterion comment="SERVICENAME runlevel 0" test_ref="test_runlevel0_SERVICENAME" />
+          <criterion comment="SERVICENAME runlevel 1" test_ref="test_runlevel1_SERVICENAME" />
+          <criterion comment="SERVICENAME runlevel 2" test_ref="test_runlevel2_SERVICENAME" />
+          <criterion comment="SERVICENAME runlevel 3" test_ref="test_runlevel3_SERVICENAME" />
+          <criterion comment="SERVICENAME runlevel 4" test_ref="test_runlevel4_SERVICENAME" />
+          <criterion comment="SERVICENAME runlevel 5" test_ref="test_runlevel5_SERVICENAME" />
+          <criterion comment="SERVICENAME runlevel 6" test_ref="test_runlevel6_SERVICENAME" />
+        </criteria>
+      </criteria>
+      <criteria operator="AND" comment="service SERVICENAME is configured with systemd">
+        <extend_definition comment="RHEL7 installed" definition_ref="installed_OS_is_rhel7"/>
+        <criteria operator="OR" comment="service SERVICENAME is configured to start">
+          <criterion comment="multi-user.target wants SERVICENAME" test_ref="test_multi_user_wants_SERVICENAME" />
+        </criteria>
+      </criteria>
     </criteria>
     </criteria>
   </definition>
@@ -64,6 +76,23 @@
     <unix:object object_ref="obj_runlevel6_SERVICENAME" />
     <unix:state state_ref="state_service_SERVICENAME_on" />
   </unix:runlevel_test>
+
+  <linux:systemdunitproperty_test check="all" check_existence="any_exist"
+  comment="systemd test" id="test_multi_user_wants_SERVICENAME"
+  version="1">
+    <linux:object object_ref="obj_multi_user_wants" />
+    <linux:state state_ref="state_systemd_SERVICENAME_on"/>
+  </linux:systemdunitproperty_test>
+
+   <linux:systemdunitdependency_object id="obj_multi_user_wants" comment="list of dependencies of multi-user.target" version="1">
+      <linux:unit>multi-user.target</linux:unit>
+   </linux:systemdunitdependency_object>
+
+    <linux:systemdunitdependency_state id="state_systemd_SERVICENAME_on" comment="is SERVICENAME listed at least once in the dependencies" version="1">
+      <linux:dependency entity_check="at least one">SERVICENAME.target</linux:dependency>
+    </linux:systemdunitdependency_state>
+
+
   <unix:runlevel_object id="obj_runlevel0_SERVICENAME" version="1">
     <unix:service_name>SERVICENAME</unix:service_name>
     <unix:runlevel operation="equals">0</unix:runlevel>
