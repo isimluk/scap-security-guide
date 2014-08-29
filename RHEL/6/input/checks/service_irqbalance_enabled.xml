@@ -8,17 +8,29 @@
         <platform>Red Hat Enterprise Linux 6</platform>
       </affected>
       <description>The irqbalance service should be enabled if possible.</description>
+      <reference source="changeme" ref_id="20140828" ref_url="test_attestation" />
     </metadata>
     <criteria comment="package irqbalance installed and service irqbalance is configured to start" operator="AND">
     <extend_definition comment="irqbalance installed" definition_ref="package_irqbalance_installed" />
     <criteria operator="OR" comment="service irqbalance is configured to start">
-      <criterion comment="irqbalance runlevel 0" test_ref="test_runlevel0_irqbalance" />
-      <criterion comment="irqbalance runlevel 1" test_ref="test_runlevel1_irqbalance" />
-      <criterion comment="irqbalance runlevel 2" test_ref="test_runlevel2_irqbalance" />
-      <criterion comment="irqbalance runlevel 3" test_ref="test_runlevel3_irqbalance" />
-      <criterion comment="irqbalance runlevel 4" test_ref="test_runlevel4_irqbalance" />
-      <criterion comment="irqbalance runlevel 5" test_ref="test_runlevel5_irqbalance" />
-      <criterion comment="irqbalance runlevel 6" test_ref="test_runlevel6_irqbalance" />
+      <criteria operator="AND" comment="service irqbalance is configured with runlevel">
+        <extend_definition comment="RHEL6 installed" definition_ref="installed_OS_is_rhel6"/>
+        <criteria operator="OR" comment="service irqbalance is configured to start">
+          <criterion comment="irqbalance runlevel 0" test_ref="test_runlevel0_irqbalance" />
+          <criterion comment="irqbalance runlevel 1" test_ref="test_runlevel1_irqbalance" />
+          <criterion comment="irqbalance runlevel 2" test_ref="test_runlevel2_irqbalance" />
+          <criterion comment="irqbalance runlevel 3" test_ref="test_runlevel3_irqbalance" />
+          <criterion comment="irqbalance runlevel 4" test_ref="test_runlevel4_irqbalance" />
+          <criterion comment="irqbalance runlevel 5" test_ref="test_runlevel5_irqbalance" />
+          <criterion comment="irqbalance runlevel 6" test_ref="test_runlevel6_irqbalance" />
+        </criteria>
+      </criteria>
+      <criteria operator="AND" comment="service irqbalance is configured with systemd">
+        <extend_definition comment="RHEL7 installed" definition_ref="installed_OS_is_rhel7"/>
+        <criteria operator="OR" comment="service irqbalance is configured to start">
+          <criterion comment="multi-user.target wants irqbalance" test_ref="test_multi_user_wants_irqbalance" />
+        </criteria>
+      </criteria>
     </criteria>
     </criteria>
   </definition>
@@ -64,6 +76,23 @@
     <unix:object object_ref="obj_runlevel6_irqbalance" />
     <unix:state state_ref="state_service_irqbalance_on" />
   </unix:runlevel_test>
+
+  <linux:systemdunitproperty_test check="all" check_existence="any_exist"
+  comment="systemd test" id="test_multi_user_wants_irqbalance"
+  version="1">
+    <linux:object object_ref="obj_multi_user_wants" />
+    <linux:state state_ref="state_systemd_irqbalance_on"/>
+  </linux:systemdunitproperty_test>
+
+   <linux:systemdunitdependency_object id="obj_multi_user_wants" comment="list of dependencies of multi-user.target" version="1">
+      <linux:unit>multi-user.target</linux:unit>
+   </linux:systemdunitdependency_object>
+
+    <linux:systemdunitdependency_state id="state_systemd_irqbalance_on" comment="is irqbalance listed at least once in the dependencies" version="1">
+      <linux:dependency entity_check="at least one">irqbalance.target</linux:dependency>
+    </linux:systemdunitdependency_state>
+
+
   <unix:runlevel_object id="obj_runlevel0_irqbalance" version="1">
     <unix:service_name>irqbalance</unix:service_name>
     <unix:runlevel operation="equals">0</unix:runlevel>

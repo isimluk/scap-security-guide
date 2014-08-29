@@ -8,18 +8,29 @@
         <platform>Red Hat Enterprise Linux 6</platform>
       </affected>
       <description>The auditd service should be enabled if possible.</description>
-      <reference source="DS" ref_id="20131002" ref_url="test_attestation" />
+      <reference source="changeme" ref_id="20140828" ref_url="test_attestation" />
     </metadata>
     <criteria comment="package audit installed and service auditd is configured to start" operator="AND">
     <extend_definition comment="audit installed" definition_ref="package_audit_installed" />
     <criteria operator="OR" comment="service auditd is configured to start">
-      <criterion comment="auditd runlevel 0" test_ref="test_runlevel0_auditd" />
-      <criterion comment="auditd runlevel 1" test_ref="test_runlevel1_auditd" />
-      <criterion comment="auditd runlevel 2" test_ref="test_runlevel2_auditd" />
-      <criterion comment="auditd runlevel 3" test_ref="test_runlevel3_auditd" />
-      <criterion comment="auditd runlevel 4" test_ref="test_runlevel4_auditd" />
-      <criterion comment="auditd runlevel 5" test_ref="test_runlevel5_auditd" />
-      <criterion comment="auditd runlevel 6" test_ref="test_runlevel6_auditd" />
+      <criteria operator="AND" comment="service auditd is configured with runlevel">
+        <extend_definition comment="RHEL6 installed" definition_ref="installed_OS_is_rhel6"/>
+        <criteria operator="OR" comment="service auditd is configured to start">
+          <criterion comment="auditd runlevel 0" test_ref="test_runlevel0_auditd" />
+          <criterion comment="auditd runlevel 1" test_ref="test_runlevel1_auditd" />
+          <criterion comment="auditd runlevel 2" test_ref="test_runlevel2_auditd" />
+          <criterion comment="auditd runlevel 3" test_ref="test_runlevel3_auditd" />
+          <criterion comment="auditd runlevel 4" test_ref="test_runlevel4_auditd" />
+          <criterion comment="auditd runlevel 5" test_ref="test_runlevel5_auditd" />
+          <criterion comment="auditd runlevel 6" test_ref="test_runlevel6_auditd" />
+        </criteria>
+      </criteria>
+      <criteria operator="AND" comment="service auditd is configured with systemd">
+        <extend_definition comment="RHEL7 installed" definition_ref="installed_OS_is_rhel7"/>
+        <criteria operator="OR" comment="service auditd is configured to start">
+          <criterion comment="multi-user.target wants auditd" test_ref="test_multi_user_wants_auditd" />
+        </criteria>
+      </criteria>
     </criteria>
     </criteria>
   </definition>
@@ -65,6 +76,23 @@
     <unix:object object_ref="obj_runlevel6_auditd" />
     <unix:state state_ref="state_service_auditd_on" />
   </unix:runlevel_test>
+
+  <linux:systemdunitproperty_test check="all" check_existence="any_exist"
+  comment="systemd test" id="test_multi_user_wants_auditd"
+  version="1">
+    <linux:object object_ref="obj_multi_user_wants" />
+    <linux:state state_ref="state_systemd_auditd_on"/>
+  </linux:systemdunitproperty_test>
+
+   <linux:systemdunitdependency_object id="obj_multi_user_wants" comment="list of dependencies of multi-user.target" version="1">
+      <linux:unit>multi-user.target</linux:unit>
+   </linux:systemdunitdependency_object>
+
+    <linux:systemdunitdependency_state id="state_systemd_auditd_on" comment="is auditd listed at least once in the dependencies" version="1">
+      <linux:dependency entity_check="at least one">auditd.target</linux:dependency>
+    </linux:systemdunitdependency_state>
+
+
   <unix:runlevel_object id="obj_runlevel0_auditd" version="1">
     <unix:service_name>auditd</unix:service_name>
     <unix:runlevel operation="equals">0</unix:runlevel>

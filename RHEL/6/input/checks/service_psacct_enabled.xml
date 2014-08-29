@@ -8,17 +8,29 @@
         <platform>Red Hat Enterprise Linux 6</platform>
       </affected>
       <description>The psacct service should be enabled if possible.</description>
+      <reference source="changeme" ref_id="20140828" ref_url="test_attestation" />
     </metadata>
     <criteria comment="package psacct installed and service psacct is configured to start" operator="AND">
     <extend_definition comment="psacct installed" definition_ref="package_psacct_installed" />
     <criteria operator="OR" comment="service psacct is configured to start">
-      <criterion comment="psacct runlevel 0" test_ref="test_runlevel0_psacct" />
-      <criterion comment="psacct runlevel 1" test_ref="test_runlevel1_psacct" />
-      <criterion comment="psacct runlevel 2" test_ref="test_runlevel2_psacct" />
-      <criterion comment="psacct runlevel 3" test_ref="test_runlevel3_psacct" />
-      <criterion comment="psacct runlevel 4" test_ref="test_runlevel4_psacct" />
-      <criterion comment="psacct runlevel 5" test_ref="test_runlevel5_psacct" />
-      <criterion comment="psacct runlevel 6" test_ref="test_runlevel6_psacct" />
+      <criteria operator="AND" comment="service psacct is configured with runlevel">
+        <extend_definition comment="RHEL6 installed" definition_ref="installed_OS_is_rhel6"/>
+        <criteria operator="OR" comment="service psacct is configured to start">
+          <criterion comment="psacct runlevel 0" test_ref="test_runlevel0_psacct" />
+          <criterion comment="psacct runlevel 1" test_ref="test_runlevel1_psacct" />
+          <criterion comment="psacct runlevel 2" test_ref="test_runlevel2_psacct" />
+          <criterion comment="psacct runlevel 3" test_ref="test_runlevel3_psacct" />
+          <criterion comment="psacct runlevel 4" test_ref="test_runlevel4_psacct" />
+          <criterion comment="psacct runlevel 5" test_ref="test_runlevel5_psacct" />
+          <criterion comment="psacct runlevel 6" test_ref="test_runlevel6_psacct" />
+        </criteria>
+      </criteria>
+      <criteria operator="AND" comment="service psacct is configured with systemd">
+        <extend_definition comment="RHEL7 installed" definition_ref="installed_OS_is_rhel7"/>
+        <criteria operator="OR" comment="service psacct is configured to start">
+          <criterion comment="multi-user.target wants psacct" test_ref="test_multi_user_wants_psacct" />
+        </criteria>
+      </criteria>
     </criteria>
     </criteria>
   </definition>
@@ -64,6 +76,23 @@
     <unix:object object_ref="obj_runlevel6_psacct" />
     <unix:state state_ref="state_service_psacct_on" />
   </unix:runlevel_test>
+
+  <linux:systemdunitproperty_test check="all" check_existence="any_exist"
+  comment="systemd test" id="test_multi_user_wants_psacct"
+  version="1">
+    <linux:object object_ref="obj_multi_user_wants" />
+    <linux:state state_ref="state_systemd_psacct_on"/>
+  </linux:systemdunitproperty_test>
+
+   <linux:systemdunitdependency_object id="obj_multi_user_wants" comment="list of dependencies of multi-user.target" version="1">
+      <linux:unit>multi-user.target</linux:unit>
+   </linux:systemdunitdependency_object>
+
+    <linux:systemdunitdependency_state id="state_systemd_psacct_on" comment="is psacct listed at least once in the dependencies" version="1">
+      <linux:dependency entity_check="at least one">psacct.target</linux:dependency>
+    </linux:systemdunitdependency_state>
+
+
   <unix:runlevel_object id="obj_runlevel0_psacct" version="1">
     <unix:service_name>psacct</unix:service_name>
     <unix:runlevel operation="equals">0</unix:runlevel>

@@ -5,7 +5,6 @@
       <title>Verify /etc/gshadow Permissions</title>
       <affected family="unix">
         <platform>Red Hat Enterprise Linux 6</platform>
-        <platform>Red Hat Enterprise Linux 7</platform>
       </affected>
       <description>This test makes sure that /etc/gshadow is owned by 0, group owned by 0, and has mode 0000. If
       the target file or directory has an extended ACL then it will fail the mode check.</description>
@@ -22,7 +21,8 @@
     <unix:state state_ref="_etc_gshadow_state_mode_0000" />
   </unix:file_test>
   <unix:file_object comment="/etc/gshadow" id="object_etc_gshadow" version="1">
-    <unix:filepath>/etc/gshadow</unix:filepath>
+    <unix:path>/etc</unix:path>
+    <unix:filename>gshadow</unix:filename>
   </unix:file_object>
   <unix:file_state id="_etc_gshadow_state_uid_0" version="1">
     <unix:user_id datatype="int" operation="equals">0</unix:user_id>

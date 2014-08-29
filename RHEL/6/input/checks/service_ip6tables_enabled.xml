@@ -8,18 +8,29 @@
         <platform>Red Hat Enterprise Linux 6</platform>
       </affected>
       <description>The ip6tables service should be enabled if possible.</description>
-      <reference source="DS" ref_id="20131011" ref_url="test_attestation" />
+      <reference source="changeme" ref_id="20140828" ref_url="test_attestation" />
     </metadata>
     <criteria comment="package iptables-ipv6 installed and service ip6tables is configured to start" operator="AND">
     <extend_definition comment="iptables-ipv6 installed" definition_ref="package_iptables-ipv6_installed" />
     <criteria operator="OR" comment="service ip6tables is configured to start">
-      <criterion comment="ip6tables runlevel 0" test_ref="test_runlevel0_ip6tables" />
-      <criterion comment="ip6tables runlevel 1" test_ref="test_runlevel1_ip6tables" />
-      <criterion comment="ip6tables runlevel 2" test_ref="test_runlevel2_ip6tables" />
-      <criterion comment="ip6tables runlevel 3" test_ref="test_runlevel3_ip6tables" />
-      <criterion comment="ip6tables runlevel 4" test_ref="test_runlevel4_ip6tables" />
-      <criterion comment="ip6tables runlevel 5" test_ref="test_runlevel5_ip6tables" />
-      <criterion comment="ip6tables runlevel 6" test_ref="test_runlevel6_ip6tables" />
+      <criteria operator="AND" comment="service ip6tables is configured with runlevel">
+        <extend_definition comment="RHEL6 installed" definition_ref="installed_OS_is_rhel6"/>
+        <criteria operator="OR" comment="service ip6tables is configured to start">
+          <criterion comment="ip6tables runlevel 0" test_ref="test_runlevel0_ip6tables" />
+          <criterion comment="ip6tables runlevel 1" test_ref="test_runlevel1_ip6tables" />
+          <criterion comment="ip6tables runlevel 2" test_ref="test_runlevel2_ip6tables" />
+          <criterion comment="ip6tables runlevel 3" test_ref="test_runlevel3_ip6tables" />
+          <criterion comment="ip6tables runlevel 4" test_ref="test_runlevel4_ip6tables" />
+          <criterion comment="ip6tables runlevel 5" test_ref="test_runlevel5_ip6tables" />
+          <criterion comment="ip6tables runlevel 6" test_ref="test_runlevel6_ip6tables" />
+        </criteria>
+      </criteria>
+      <criteria operator="AND" comment="service ip6tables is configured with systemd">
+        <extend_definition comment="RHEL7 installed" definition_ref="installed_OS_is_rhel7"/>
+        <criteria operator="OR" comment="service ip6tables is configured to start">
+          <criterion comment="multi-user.target wants ip6tables" test_ref="test_multi_user_wants_ip6tables" />
+        </criteria>
+      </criteria>
     </criteria>
     </criteria>
   </definition>
@@ -65,6 +76,23 @@
     <unix:object object_ref="obj_runlevel6_ip6tables" />
     <unix:state state_ref="state_service_ip6tables_on" />
   </unix:runlevel_test>
+
+  <linux:systemdunitproperty_test check="all" check_existence="any_exist"
+  comment="systemd test" id="test_multi_user_wants_ip6tables"
+  version="1">
+    <linux:object object_ref="obj_multi_user_wants" />
+    <linux:state state_ref="state_systemd_ip6tables_on"/>
+  </linux:systemdunitproperty_test>
+
+   <linux:systemdunitdependency_object id="obj_multi_user_wants" comment="list of dependencies of multi-user.target" version="1">
+      <linux:unit>multi-user.target</linux:unit>
+   </linux:systemdunitdependency_object>
+
+    <linux:systemdunitdependency_state id="state_systemd_ip6tables_on" comment="is ip6tables listed at least once in the dependencies" version="1">
+      <linux:dependency entity_check="at least one">ip6tables.target</linux:dependency>
+    </linux:systemdunitdependency_state>
+
+
   <unix:runlevel_object id="obj_runlevel0_ip6tables" version="1">
     <unix:service_name>ip6tables</unix:service_name>
     <unix:runlevel operation="equals">0</unix:runlevel>

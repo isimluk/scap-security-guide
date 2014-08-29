@@ -8,18 +8,29 @@
         <platform>Red Hat Enterprise Linux 6</platform>
       </affected>
       <description>The ntpd service should be enabled if possible.</description>
-      <reference source="DS" ref_id="20130918" ref_url="test_attestation" />
+      <reference source="changeme" ref_id="20140828" ref_url="test_attestation" />
     </metadata>
     <criteria comment="package ntp installed and service ntpd is configured to start" operator="AND">
     <extend_definition comment="ntp installed" definition_ref="package_ntp_installed" />
     <criteria operator="OR" comment="service ntpd is configured to start">
-      <criterion comment="ntpd runlevel 0" test_ref="test_runlevel0_ntpd" />
-      <criterion comment="ntpd runlevel 1" test_ref="test_runlevel1_ntpd" />
-      <criterion comment="ntpd runlevel 2" test_ref="test_runlevel2_ntpd" />
-      <criterion comment="ntpd runlevel 3" test_ref="test_runlevel3_ntpd" />
-      <criterion comment="ntpd runlevel 4" test_ref="test_runlevel4_ntpd" />
-      <criterion comment="ntpd runlevel 5" test_ref="test_runlevel5_ntpd" />
-      <criterion comment="ntpd runlevel 6" test_ref="test_runlevel6_ntpd" />
+      <criteria operator="AND" comment="service ntpd is configured with runlevel">
+        <extend_definition comment="RHEL6 installed" definition_ref="installed_OS_is_rhel6"/>
+        <criteria operator="OR" comment="service ntpd is configured to start">
+          <criterion comment="ntpd runlevel 0" test_ref="test_runlevel0_ntpd" />
+          <criterion comment="ntpd runlevel 1" test_ref="test_runlevel1_ntpd" />
+          <criterion comment="ntpd runlevel 2" test_ref="test_runlevel2_ntpd" />
+          <criterion comment="ntpd runlevel 3" test_ref="test_runlevel3_ntpd" />
+          <criterion comment="ntpd runlevel 4" test_ref="test_runlevel4_ntpd" />
+          <criterion comment="ntpd runlevel 5" test_ref="test_runlevel5_ntpd" />
+          <criterion comment="ntpd runlevel 6" test_ref="test_runlevel6_ntpd" />
+        </criteria>
+      </criteria>
+      <criteria operator="AND" comment="service ntpd is configured with systemd">
+        <extend_definition comment="RHEL7 installed" definition_ref="installed_OS_is_rhel7"/>
+        <criteria operator="OR" comment="service ntpd is configured to start">
+          <criterion comment="multi-user.target wants ntpd" test_ref="test_multi_user_wants_ntpd" />
+        </criteria>
+      </criteria>
     </criteria>
     </criteria>
   </definition>
@@ -65,6 +76,23 @@
     <unix:object object_ref="obj_runlevel6_ntpd" />
     <unix:state state_ref="state_service_ntpd_on" />
   </unix:runlevel_test>
+
+  <linux:systemdunitproperty_test check="all" check_existence="any_exist"
+  comment="systemd test" id="test_multi_user_wants_ntpd"
+  version="1">
+    <linux:object object_ref="obj_multi_user_wants" />
+    <linux:state state_ref="state_systemd_ntpd_on"/>
+  </linux:systemdunitproperty_test>
+
+   <linux:systemdunitdependency_object id="obj_multi_user_wants" comment="list of dependencies of multi-user.target" version="1">
+      <linux:unit>multi-user.target</linux:unit>
+   </linux:systemdunitdependency_object>
+
+    <linux:systemdunitdependency_state id="state_systemd_ntpd_on" comment="is ntpd listed at least once in the dependencies" version="1">
+      <linux:dependency entity_check="at least one">ntpd.target</linux:dependency>
+    </linux:systemdunitdependency_state>
+
+
   <unix:runlevel_object id="obj_runlevel0_ntpd" version="1">
     <unix:service_name>ntpd</unix:service_name>
     <unix:runlevel operation="equals">0</unix:runlevel>
