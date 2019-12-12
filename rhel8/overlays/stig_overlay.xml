@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<overlays xmlns="http://checklists.nist.gov/xccdf/1.1">
+  <overlay disa="48" owner="disastig" ownerid="RHEL-07-010030" ruleid="dconf_gnome_banner_enabled" severity="medium">
+    <VMSinfo SVKey="86483" VKey="71859" VRelease="4">
+      <title>The Red Hat Enterprise Linux operating system must display the Standard Mandatory DoD Notice and Consent Banner before granting local or remote access to the system via a graphical user logon.</title>
+    </VMSinfo>
+    <title>The Red Hat Enterprise Linux operating system must display the Standard Mandatory DoD Notice and Consent Banner before granting local or remote access to the system via a graphical user logon.</title>
+  </overlay>
+</overlays>
