@@ -1,0 +1,33 @@
+galaxy_info:
+  role_name: rhel7_hipaa
+  author: ComplianceAsCode development team
+  description: Health Insurance Portability and Accountability Act (HIPAA)
+
+  issue_tracker_url: https://github.com/ComplianceAsCode/content/issues
+
+  license: BSD-3-Clause
+
+  min_ansible_version: 2.5
+
+  platforms:
+  - name: GenericBSD
+    versions:
+    - any
+  - name: GenericLinux
+    versions:
+    - any
+  - name: GenericUNIX
+    versions:
+    - any
+
+  galaxy_tags:
+  - system
+  - hardening
+  - openscap
+  - ssg
+  - scap
+  - security
+  - compliance
+  - compliaceascode
+
+dependencies: []
